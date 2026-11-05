@@ -1,0 +1,5 @@
+[install]
+# Text lockfile (bun.lock), readable in reviews.
+saveTextLockfile = true
+# Supply-chain guard: skip package versions published less than a day ago.
+minimumReleaseAge = 86400

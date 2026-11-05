@@ -1,0 +1,33 @@
+# Runs the published image from Docker Hub (docker compose pull && docker compose up -d).
+# In a checkout of the source, `docker compose up -d --build` builds it locally instead.
+# Settings come from a .env file next to this file (not committed); see .env.example.
+services:
+  irtrack:
+    image: patatties/irtrack:latest
+    build: .
+    ports:
+      - "8080:3000"
+    environment:
+      # Optional token for the MCP server at /mcp. Empty = MCP works without a token.
+      IRTRACK_MCP_TOKEN: ${IRTRACK_MCP_TOKEN:-}
+      # AI-assisted setup: configure one or more providers. All optional.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      # AI assistant in portal and Admin Console: provider/model (default: first configured provider with a model)
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-}
+    extra_hosts:
+      # Lets the container reach services on your machine (e.g. Ollama) as host.docker.internal.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - irtrack-data:/data # SQLite database (irtrack.db); back up this volume
+    restart: unless-stopped
+
+volumes:
+  irtrack-data:

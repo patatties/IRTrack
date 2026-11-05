@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-server
+data
+.git
+.github
+docs
+*.md
+*.tsbuildinfo
+*.log
+.env
+.env.*
