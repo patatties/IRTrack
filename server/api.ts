@@ -962,7 +962,7 @@ route("GET", "/setup", () => {
   const completedAt = getMeta("setup_completed_at");
   return { completed: !!completedAt, completedAt, counts };
 });
-route("POST", "/setup/demo", (c) => loadDemo(c.actor));
+route("POST", "/setup/demo", (c) => loadDemo(c.actor, c.body?.scope ?? "full"));
 route("POST", "/setup/complete", (c) => {
   if (!getMeta("setup_completed_at")) {
     setMeta("setup_completed_at", now());

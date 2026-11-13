@@ -14,9 +14,9 @@ export function ContactCard({
 }) {
   const stale = differenceInDays(new Date(), new Date(c.lastVerifiedAt)) > verifyDays;
   return (
-    <div className="rounded-xl border bg-card p-4 shadow-card">
+    <div className="h-full min-w-0 rounded-xl border bg-card p-4 shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <p className="font-semibold">{c.name}</p>
           <p className="text-sm text-muted-foreground">
             {c.role} · {c.team}
@@ -47,9 +47,9 @@ export function ContactCard({
         {c.email && (
           <a
             href={`mailto:${c.email}`}
-            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted"
+            className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted"
           >
-            <Mail className="size-4" /> {c.email}
+            <Mail className="size-4 shrink-0" /> <span className="break-all">{c.email}</span>
           </a>
         )}
       </div>

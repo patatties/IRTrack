@@ -18,7 +18,13 @@ import {
 } from "@/shared/hooks";
 import { repos } from "@/data";
 import { currentActor } from "@/auth/actor";
-import { LEVELS, type ContactInput, type Settings, type TemplateKind } from "@/domain/types";
+import {
+  LEVELS,
+  type ContactInput,
+  type DemoScope,
+  type Settings,
+  type TemplateKind,
+} from "@/domain/types";
 import { t } from "@/i18n";
 
 export const Route = createFileRoute("/setup")({
@@ -65,19 +71,19 @@ function SetupPage() {
     if (!skipped) toast.success(t("setup.finished"));
     navigate({ to: "/" });
   };
-  const [demoLoading, setDemoLoading] = useState(false);
-  const loadDemo = async () => {
+  const [demoLoading, setDemoLoading] = useState<DemoScope | null>(null);
+  const loadDemo = async (scope: DemoScope) => {
     if (!confirm(t("setup.demoConfirm"))) return;
-    setDemoLoading(true);
+    setDemoLoading(scope);
     try {
-      const r = await repos().setup.loadDemo();
+      const r = await repos().setup.loadDemo(scope);
       await qc.invalidateQueries();
       toast.success(t("setup.demoLoaded", { n: r.incidents }));
       navigate({ to: "/" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
     } finally {
-      setDemoLoading(false);
+      setDemoLoading(null);
     }
   };
   const id = STEPS[step];
@@ -120,9 +126,20 @@ function SetupPage() {
                 </Button>
               </Card>
               <Card title={t("setup.demoTitle")} takeaway={t("setup.demoHelp")}>
-                <Button variant="outline" disabled={demoLoading} onClick={loadDemo}>
-                  {demoLoading ? t("setup.demoLoading") : t("setup.demoButton")}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  {(["full", "it-security"] as const).map((scope) => (
+                    <Button
+                      key={scope}
+                      variant="outline"
+                      disabled={demoLoading !== null}
+                      onClick={() => loadDemo(scope)}
+                    >
+                      {demoLoading === scope
+                        ? t("setup.demoLoading")
+                        : t(`setup.demoScopes.${scope}`)}
+                    </Button>
+                  ))}
+                </div>
               </Card>
             </div>
           </div>

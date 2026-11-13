@@ -257,8 +257,11 @@ export const en = {
     ownHelp: "Step by step, with examples to choose from. For real use.",
     demoTitle: "Explore with demo data",
     demoHelp:
-      "Skips the setup and fills the database with the fictional “Northshore Municipality”: contacts, processes, guidance, about 2,500 past incidents and 7 live scenarios. For trying IRTrack out — not for real use.",
-    demoButton: "Load demo data",
+      "Skips the setup and fills the database with the fictional “Northshore Municipality”. The full set has all processes, guidance, about 2,500 past incidents and 7 live scenarios; the limited set has only the IT and Security incident processes. For trying IRTrack out — not for real use.",
+    demoScopes: {
+      full: "Load full demo",
+      "it-security": "Load IT and Security only",
+    },
     demoConfirm:
       "Load the demo data? The database is filled with fictional data. To start clean later you need a new, empty database.",
     demoLoading: "Loading demo data…",

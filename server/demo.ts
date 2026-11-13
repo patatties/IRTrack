@@ -2,6 +2,8 @@
  * Demo data: the complete former mock data set for the fictional "Northshore Municipality"
  * (contacts, roles, processes, guidance, ~2,500 historical incidents and 7 demo scenarios).
  * Loaded only when chosen in the setup wizard ("Load demo data"); see loadDemo() in server/catalog.ts.
+ * The "it-security" scope keeps only the IT and Security incident processes and everything tied to
+ * them (see buildDemo()).
  */
 import { addDays, addHours, addMinutes, subDays } from "date-fns";
 import { autoLayout } from "../src/domain/layout";
@@ -9,6 +11,7 @@ import { computeDeadlines } from "../src/domain/rules";
 import { CONTACT_ROLES, ROLE_LEVEL } from "./templates";
 import type {
   Contact,
+  DemoScope,
   DomainId,
   Flowchart,
   FlowchartNode,
@@ -2200,4 +2203,50 @@ export function buildDemoIncidents(now: Date, rules: ReportingRule[]): Incident[
   );
 
   return [ransomware, phishing, misdirected, flood, accident, integrity, outage];
+}
+
+/* ---------- complete data set ---------- */
+const SCOPE_PROCESSES: Record<Exclude<DemoScope, "full">, string[]> = {
+  "it-security": ["p-it", "p-security"],
+};
+
+/**
+ * The demo data set for a scope. A limited scope keeps only its processes and what belongs to
+ * them: guidance and incidents of those processes, and the reporting rules they use.
+ */
+export function buildDemo(now: Date, scope: DemoScope = "full") {
+  const iso = now.toISOString();
+  let processes = buildProcesses(iso);
+  let rules = buildRules(now);
+  let situations = buildSituations(now);
+  let incidents = [...buildDemoIncidents(now, rules), ...generateHistory(now)];
+  const settings = buildSettings();
+  if (scope !== "full") {
+    const keep = new Set(SCOPE_PROCESSES[scope]);
+    processes = processes.filter((p) => keep.has(p.id));
+    situations = situations.filter((s) => keep.has(s.versions[0].content.processId));
+    incidents = incidents.filter((i) => keep.has(i.processId));
+    const incidentIds = new Set(incidents.map((i) => i.id));
+    incidents = incidents.map((i) => ({
+      ...i,
+      relatedIds: i.relatedIds.filter((id) => incidentIds.has(id)),
+    }));
+    const usedRules = new Set(incidents.flatMap((i) => i.deadlines.map((d) => d.ruleId)));
+    rules = rules
+      .filter((r) => usedRules.has(r.id) || r.processIds.some((id) => keep.has(id)))
+      .map((r) => ({ ...r, processIds: r.processIds.filter((id) => keep.has(id)) }));
+    const situationIds = new Set(situations.map((s) => s.id));
+    settings.portal.featured = settings.portal.featured.filter((id) => situationIds.has(id));
+  }
+  return {
+    contacts: buildContacts(now),
+    roles: buildRoles(iso),
+    processes,
+    raci: buildRaci(processes),
+    rules,
+    situations,
+    sources: buildSources(now),
+    settings,
+    incidents,
+  };
 }

@@ -3,6 +3,7 @@ import type {
   AuditEvent,
   Contact,
   ContactInput,
+  DemoScope,
   DomainId,
   GuidanceContent,
   GuidanceSituation,
@@ -175,8 +176,8 @@ export interface Repositories {
   setup: {
     status(): Promise<SetupStatus>;
     complete(skipped?: boolean): Promise<void>;
-    /** Fills a new database with the complete demo data set and completes the setup. */
-    loadDemo(): Promise<{ incidents: number }>;
+    /** Fills a new database with the demo data set for the scope and completes the setup. */
+    loadDemo(scope: DemoScope): Promise<{ incidents: number }>;
   };
   ai: {
     providers(): Promise<AiProviderInfo[]>;

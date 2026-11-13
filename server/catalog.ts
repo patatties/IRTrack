@@ -41,6 +41,7 @@ import {
 } from "./templates";
 import type {
   Contact,
+  DemoScope,
   GuidanceSituation,
   Process,
   ReportingRule,
@@ -307,10 +308,12 @@ export function applyTemplates(
 }
 
 /**
- * Fills an empty database with the complete demo data set (fictional "Northshore Municipality")
- * and marks the setup as done. Refused once the setup is completed or incidents exist.
+ * Fills an empty database with the demo data set (fictional "Northshore Municipality") for the
+ * chosen scope and marks the setup as done. Refused once the setup is completed or incidents exist.
  */
-export function loadDemo(actor: string): { incidents: number } {
+export function loadDemo(actor: string, scope: DemoScope = "full"): { incidents: number } {
+  if (scope !== "full" && scope !== "it-security")
+    throw new HttpError(400, `Unknown demo scope: ${String(scope)}`);
   if (getMeta("setup_completed_at"))
     throw new HttpError(
       409,
@@ -320,18 +323,17 @@ export function loadDemo(actor: string): { incidents: number } {
     throw new HttpError(409, "The database already contains incidents.");
   const now = new Date();
   const iso = now.toISOString();
-  const processes = demo.buildProcesses(iso);
-  const rules = demo.buildRules(now);
-  const incidents = [...demo.buildDemoIncidents(now, rules), ...demo.generateHistory(now)];
-  const { secrets: _s, history: _h, ...sections } = demo.buildSettings();
+  const d = demo.buildDemo(now, scope);
+  const incidents = d.incidents;
+  const { secrets: _s, history: _h, ...sections } = d.settings;
   conn().transaction(() => {
-    saveMany(contactSpec, demo.buildContacts(now));
-    saveMany(roleSpec, demo.buildRoles(iso));
-    saveMany(processSpec, processes);
-    saveMany(raciSpec, demo.buildRaci(processes));
-    saveMany(ruleSpec, rules);
-    saveMany(guidanceSpec, demo.buildSituations(now));
-    saveMany(sourceSpec, demo.buildSources(now));
+    saveMany(contactSpec, d.contacts);
+    saveMany(roleSpec, d.roles);
+    saveMany(processSpec, d.processes);
+    saveMany(raciSpec, d.raci);
+    saveMany(ruleSpec, d.rules);
+    saveMany(guidanceSpec, d.situations);
+    saveMany(sourceSpec, d.sources);
     for (const [section, value] of Object.entries(sections)) setSettingSection(section, value);
     saveMany(incidentSpec, incidents);
     setMeta("demo_loaded_at", iso);
@@ -341,7 +343,7 @@ export function loadDemo(actor: string): { incidents: number } {
       "system.demo",
       "system",
       "-",
-      `Demo data loaded (Northshore Municipality, ${incidents.length} incidents)`,
+      `Demo data loaded (Northshore Municipality, ${scope === "full" ? "full set" : "IT and Security only"}, ${incidents.length} incidents)`,
       true,
     );
   })();

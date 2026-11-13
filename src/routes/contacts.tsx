@@ -71,6 +71,7 @@ function ContactsPage() {
             roles={roles}
             contacts={data}
             renderContact={card}
+            roleLayout="rows"
             renderRole={(r, cs) => (
               <div className="space-y-2">
                 <p className="font-semibold">
@@ -78,7 +79,11 @@ function ContactsPage() {
                   <span className="text-sm font-normal text-muted-foreground">· {r.summary}</span>
                 </p>
                 {cs.length ? (
-                  cs.map((c) => <div key={c.id}>{card(c)}</div>)
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {cs.map((c) => (
+                      <div key={c.id}>{card(c)}</div>
+                    ))}
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">{t("roles.noContacts")}</p>
                 )}

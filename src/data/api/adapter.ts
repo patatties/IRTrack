@@ -94,7 +94,7 @@ export const apiRepositories: Repositories = {
   setup: {
     status: () => http("GET", "/setup"),
     complete: (skipped) => http("POST", "/setup/complete", { skipped: !!skipped }),
-    loadDemo: () => http("POST", "/setup/demo"),
+    loadDemo: (scope) => http("POST", "/setup/demo", { scope }),
   },
   ai: {
     providers: () => http("GET", "/ai/providers"),

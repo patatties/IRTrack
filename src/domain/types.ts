@@ -432,6 +432,9 @@ export interface TemplateItem {
   requires: string[];
 }
 
+/** Which demo data set to load: everything, or only the IT and Security incident processes. */
+export type DemoScope = "full" | "it-security";
+
 export interface TemplateApplyResult {
   added: { kind: TemplateKind; id: string; name: string }[];
   skipped: { kind: TemplateKind; id: string; name: string }[];

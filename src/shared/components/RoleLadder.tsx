@@ -63,6 +63,7 @@ export function RoleLadder({
   renderContact,
   process,
   emptyLevel,
+  roleLayout = "grid",
 }: {
   roles: Role[];
   contacts: Contact[];
@@ -70,6 +71,8 @@ export function RoleLadder({
   renderContact: (c: Contact) => ReactNode;
   process?: Process;
   emptyLevel?: ReactNode;
+  /** "grid": compact role cards side by side; "rows": one full-width row per role (for roles that show their contacts as a grid of cards). */
+  roleLayout?: "grid" | "rows";
 }) {
   const byName = (a: Role, b: Role) => a.name.localeCompare(b.name);
   const noRole = contacts
@@ -79,6 +82,7 @@ export function RoleLadder({
   const other = noRole.filter((c) => !c.emergency);
   const unlevelled = roles.filter((r) => !r.level).sort(byName);
   const grid = "grid gap-3 md:grid-cols-2 xl:grid-cols-3";
+  const roleGrid = roleLayout === "rows" ? "grid gap-5" : grid;
 
   return (
     <div>
@@ -105,7 +109,7 @@ export function RoleLadder({
                   <p className="w-full text-sm text-muted-foreground">{t(`levelHelp.${l}`)}</p>
                 </div>
                 {xs.length ? (
-                  <div className={grid}>
+                  <div className={roleGrid}>
                     {xs.map((r) => (
                       <div key={r.id}>{renderRole(r, contactsOf(r, contacts))}</div>
                     ))}
@@ -136,7 +140,7 @@ export function RoleLadder({
         <section className="mt-6 rounded-xl border border-dashed bg-muted/60 p-4">
           <h2 className="text-lg font-semibold">{t("roles.other")}</h2>
           <p className="mb-3 text-sm text-muted-foreground">{t("roles.otherHelp")}</p>
-          <div className={grid}>
+          <div className={roleGrid}>
             {unlevelled.map((r) => (
               <div key={r.id}>{renderRole(r, contactsOf(r, contacts))}</div>
             ))}
